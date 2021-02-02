@@ -42,7 +42,13 @@ it('can login', async () => {
   const href = await page.$eval(".boardList2__name > a.linkTo", el => el.href)
   expect(href).toEqual(expectedURL)
 
-  await page.waitForTimeout(10 * 1000);
 
-  await browser.close();
+  const [popup] = await Promise.all([
+    page.waitForEvent("popup"), // 別タブが開くイベントが起きたらそのタブのpageオブジェクトを返すPromise
+    page.click('.boardList2__name > a.linkTo'), // 別タブを開くPromise
+  ]);
+  await popup.waitForLoadState("load");
+
+  await popup.waitForTimeout(10 * 1000);
+  await popup.close()
 });
